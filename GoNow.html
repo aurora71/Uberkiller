@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Current Available Car</title>
+
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.js'></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="http://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.0.1/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+div button {
+position: absolute;
+    margin-left: 121px;
+    margin-top: 20px;
+    width: 165px;
+    height: 45px;  
+    color: black;  
+    background: white; 
+    font-size:18px;
+    font-weight:700;
+}
+</style>
+</head>
+<body onload="Initialize()">
+<div id='map'></div>
+<div><button type="button" id='home' onclick="Gohome()">Home Page</button></div>
+<script>
+var go = '';
+var PassengerId = '';
+var socket = io();
+var longitude = '';
+var latitude = '';
+var markers = {};
+function Gohome() {
+  window.location.href = '/' + PassengerId;
+}
+function Initialize() {
+  var currentLocation = window.location.href;
+  var index = currentLocation.lastIndexOf('/');
+  go = currentLocation.substring(index + 1);
+  var rest = currentLocation.substring(0, index);
+  console.log(rest);
+  PassengerId = rest.substring(rest.lastIndexOf('/') + 1);
+  console.log(PassengerId);
+  for (var i = 0; i < data.length; i++) {
+  var each = data[i];
+  if(each.destination == go) {
+    var each = data[i];
+    markers[each.id] = L.marker(each.latLng, {
+        icon: L.mapbox.marker.icon({
+          'marker-color': '#f86767'
+        }),
+
+    });
+  }
+}
+  console.log(go);
+  
+}
+L.mapbox.accessToken = 'pk.eyJ1IjoiaWFuamVubmluZ3MiLCJhIjoiZExwb0p5WSJ9.XLi48h-NOyJOCJuu1-h-Jg';
+var map = L.mapbox.map('map', 'mapbox.streets')
+  .setView([40.807384, -73.959789], 13);
+
+// Create or retrieve the data
+var data = [
+    {
+      destination: 'Boston',
+      latLng: [40.733615, -74.021372],
+      id: '0',
+      username : 'yiting@gmail.com',
+      cost : 12,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.743615, -74.031372],
+      id: '1',
+      username : 'brandon@gmail.com',
+      cost : 15,
+      message : 'Please take my car',
+      seats : 4
+    }, 
+    {
+      destination: 'Philadelphia',
+      latLng: [40.767542, -73.962708],
+      id: '2',
+      username : 'rao@gmail.com',
+      cost : 11,
+      message : 'Please take my car',
+      seats : 2
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.747777, -73.98674],
+      id: '3',
+      username : 'sb@gmail.com',
+      cost : 40,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Philadelphia',
+      latLng: [40.722803, -73.998413],
+      id: '4',
+      username : 'beeben@gmail.com',
+      cost : 14,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.75506, -73.829999],
+      id: '5',
+      username : 'arn@gmail.com',
+      cost : 15,
+      message : 'Please take my car',
+      seats : 2
+    },
+    {
+      destination: 'Philadelphia',
+      latLng: [40.78678, -73.972321],
+      id: '6',
+      username : 'abbey@gmail.com',
+      cost : 10,
+      message : 'Please take my car',
+      seats : 4
+    },
+    {
+      destination: 'Washington',
+      latLng: [40.808612, -73.931122],
+      id: '7',
+      username : 'tim@gmail.com',
+      cost : 34,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.806533, -73.957901],
+      id: '8',
+      username : 'hl2915@columbia.edu',
+      cost : 12,
+      message : 'Please take my car',
+      seats : 4
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.7899, -74.00322],
+      id: '9',
+      username : 'blaze@gmail.com',
+      cost : 42,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.760781, -73.935928],
+      id: '10',
+      username : 'adair@gmail.com',
+      cost : 54,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.704066, -73.955841],
+      id: '11',
+      username : 'uoou@gmail.com',
+      cost : 30,
+      message : 'Please take my car',
+      seats : 4
+    },
+    {
+      destination: 'Washington',
+      latLng: [40.793539, -73.950348],
+      id: '12',
+      username : 'jiodsfjo@gmail.com',
+      cost : 40,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Philadelphia',
+      latLng: [40.777422, -73.975067],
+      id: '13',
+      username : 'jakldj@gmail.com',
+      cost : 14,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.742575, -73.99292],
+      id: '14',
+      username : 'jojl@gmail.com',
+      cost : 15,
+      message : 'Please take my car',
+      seats : 2
+    },
+    {
+      destination: 'Philadelphia',
+      latLng: [40.728527, -73.996353],
+      id: '15',
+      username : 'joidsafjoi@gmail.com',
+      cost : 10,
+      message : 'Please take my car',
+      seats : 4
+    },
+    {
+      destination: 'Washington',
+      latLng: [40.803415,  -73.958588],
+      id: '16',
+      username : 'oifu@gmail.com',
+      cost : 34,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.778462, -73.981934],
+      id: '17',
+      username : 'lasuofu@gmail.com',
+      cost : 12,
+      message : 'Please take my car',
+      seats : 4
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.794058, -73.965454],
+      id: '18',
+      username : 'abbed@gmail.com',
+      cost : 42,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.781061,  -73.981934],
+      id: '19',
+      username : 'beeben@gmail.com',
+      cost : 54,
+      message : 'Please take my car',
+      seats : 3
+    },
+    {
+      destination: 'Boston',
+      latLng: [40.804454, -73.957901],
+      id: '20',
+      username : 'mark@gmail.com',
+      cost : 54,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.795098, -73.973694],
+      id: '21',
+      username : 'xiumin@gmail.com',
+      cost : 30,
+      message : 'Please take my car',
+      seats : 4
+    },
+    {
+      destination: 'Washington',
+      latLng: [40.78678, -73.969574],
+      id: '22',
+      username : 'jy@gmail.com',
+      cost : 40,
+      message : 'Please take my car',
+      seats : 3
+    }, 
+    {
+      destination: 'Philadelphia',
+      latLng: [40.81277, -73.956528],
+      id: '23',
+      username : 'jimmy@gmail.com',
+      cost : 14,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.806014, -73.946915],
+      id: '24',
+      username : 'kookgi@gmail.com',
+      cost : 15,
+      message : 'Please take my car',
+      seats : 2
+    },
+    {
+      destination: 'Philadelphia',
+      latLng: [40.796658, -73.948631],
+      id: '25',
+      username : 'kai@gmail.com',
+      cost : 10,
+      message : 'Please take my car',
+      seats : 4
+    },
+    {
+      destination: 'Washington',
+      latLng: [40.776642, -73.955154],
+      id: '26',
+      username : 'sehun@gmail.com',
+      cost : 34,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Washington',
+      latLng: [40.765201, -73.965797],
+      id: '27',
+      username : 'baekyun@gmail.com',
+      cost : 12,
+      message : 'Please take my car',
+      seats : 4
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.778982, -73.979187],
+      id: '28',
+      username : 'jhope@gmail.com',
+      cost : 42,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.743876, -73.97953],
+      id: '29',
+      username : 'monster@gmail.com',
+      cost : 54,
+      message : 'Please take my car',
+      seats : 3
+    },
+    {
+      destination: 'Boston',
+      latLng: [40.75558, -73.967857],
+      id: '30',
+      username : 'suga@gmail.com',
+      cost : 42,
+      message : 'Please take my car',
+      seats : 1
+    }, 
+    {
+      destination: 'Boston',
+      latLng: [40.777942, -73.977127],
+      id: '31',
+      username : 'jimmy@gmail.com',
+      cost : 54,
+      message : 'Please take my car',
+      seats : 3
+    }
+];
+
+
+navigator.geolocation.getCurrentPosition(function(location) {
+  console.log(location.coords.latitude);
+  console.log(location.coords.longitude);
+  console.log(location.coords.accuracy);
+  longitude = location.coords.longitude;
+  latitude = location.coords.latitude;
+  var marker = L.marker([location.coords.latitude, location.coords.longitude], {
+      icon: L.mapbox.marker.icon({
+        'marker-color': '#023cfc'
+      }),
+  }).addTo(map);
+});
+var t = 0;
+
+window.setInterval(function() {
+    for (var i = 0; i < data.length; i++) {
+      var each = data[i];
+      //console.log(go)
+      if(each.destination == go) {
+        //console.log(each);
+        var decode = markers[each.id].getLatLng();
+        //console.log(decode);
+        var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
+        var lat = decode.lat + 0.0005 * plusOrMinus * Math.cos(t*0.5);
+        var lng = decode.lng + 0.00005 * Math.cos(t) * (Math.floor(Math.random()) - 1);
+        // console.log(markers['1']._latlng.lat);
+        markers[each.id].setLatLng(L.latLng(
+          lat, 
+          lng)); 
+        t += 0.1;
+        var lat = 'lat = ' + markers[each.id]._latlng.lat; 
+        var lng = 'lng = ' + markers[each.id]._latlng.lng;
+        var username = each.username;
+        markers[each.id].bindPopup('<p id = "iden">' + each.id + '</p >' + 'Destination: ' + '<p id = "des">' + each.destination + '</p >' + '<div></div>' + username + '<div></div>' + lat + '<div></div>' + lng + '<div style="text-align:center"><button class="trigger">Confirm</button></div>').addTo(map); 
+        console.log(each.destination);
+      }
+    }
+}, 1000);
+
+function onMapClick(e) {
+    var des = document.getElementById("des").innerHTML;
+    var iden = document.getElementById("iden").innerHTML;
+    console.log(des);
+    console.log(iden);
+    alert("You have booked car, id = " + iden + ' destination = ' + des);
+    var reservedItem = data[iden]; 
+    Reserver(reservedItem);
+    console.log(reservedItem);
+}
+function Reserver(reservedItem) {
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth()+1;
+  var yyyy = today.getFullYear();
+  var currDate = yyyy + '/' + mm + '/' + dd;
+  console.log(currDate);
+  var cost = reservedItem.cost;
+  var username = reservedItem.username;
+  var dest = go;
+  var seat = reservedItem.seats;
+  var message = reservedItem.message;
+  var package = {
+    'DriverID' : username,
+    'PassengerId': PassengerId,
+    'Cost' : cost,
+    'Destination' : dest,
+    'Seats' : seat,
+    'Message' : message,
+    'Date' : currDate,
+    'latitude' : latitude,
+    'longitude' : longitude
+  }
+  console.log(package);
+  socket.emit('ReserveNow', package);
+}
+
+$('#map').on('click', '.trigger', onMapClick);
+</script>
+</body>
+</html>

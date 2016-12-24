@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/socket.io/socket.io.js"></script>
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<head>
+	<meta charset="utf-8">
+	<title>DriverInfo</title>
+	<h1>See the passenger info listed below</h1>
+</head>
+<style type="text/css">
+	 h2 {
+        position: relative;
+        left: 35%;
+        font-family: verdana;
+        font-size: 200%
+       } 
+      p{
+        position: relative;       
+        font-size: 130%;
+        font-family: normal;
+      } 
+    table {
+    border-collapse: collapse;
+}
+
+table, td, th {
+    border: 1px solid black;
+}
+}
+</style>
+	<body onload="Initialize()" >
+
+	<!-- <h2>See the driver info listed below</h2> -->
+	<div id = "myDiv"  onchange="getOrderNumber()">Select Passenger to Confirm </div>
+	<div class="w3-container">
+		<script type="text/javascript">
+		var socket = io();
+		var dict = {
+			"1" : "Destination",
+			"2" : "Departure",
+			"3" : "date",
+			"4" : "smoke",
+			"5" : "Cost",
+			"6" : "Seats",
+			"7" : "username"
+		}
+		
+		var info = [];
+		var rows = 0;
+		var query = {
+		    "username" : '',
+		    "Destination" : '',
+		    "Departure" : '',
+		    "date" : '',
+		    "Seats" : '',
+		    "smoke" : '',
+		    "Cost" : ''
+	  	}
+		function Initialize(){
+			document.write('<h1>See the Passenger info listed below</h1>');
+			document.write('<div id = "myDiv"  onchange="getOrderNumber()">Select Order to Confirm </div>');
+			
+			var path = window.location.href;
+			path = path.replace("%20", " ");
+
+			for (var i = 1; i <= 7; i++) {
+				var property = dict[i.toString()];
+				var startindex = path.indexOf('=');
+				var endindex = path.indexOf('?');
+				query[property] = path.substring(startindex + 1, endindex);
+				path = path.substring(endindex + 1);
+			}
+			console.log(query);
+			socket.emit('queryPassenger',query);
+			socket.on('getResultPassenger', function(data) {
+				console.log("Received From DB");
+				console.log(data);
+				info = data.Items;
+	        	console.log(info);
+	        	rows = info.length;
+	        	console.log(rows)
+	        	Select(rows);
+	        	myTable();
+
+			});
+
+		}
+
+		function Select(nums){
+			console.log(nums);
+			var myDiv = document.getElementById("myDiv");
+
+			var array = [];
+			for(var i = 1; i <= nums; i++){
+				
+				array.push(i)
+				
+			}
+			console.log(array.length)
+			var selectList = document.createElement("select");
+			selectList.setAttribute("id","mySelect");
+			myDiv.appendChild(selectList);
+
+			var ini = document.createElement("option");
+			ini.setAttribute("value",0);
+			ini.text = ' ';
+			selectList.appendChild(ini)
+			for(var i = 0; i < array.length; i++){
+				var option = document.createElement("option");
+				option.setAttribute("value",array[i]);
+				option.text = array[i];
+				selectList.appendChild(option)
+			}
+	}
+		function myTable(){
+			console.log("called");
+			console.log(info);
+			var columns = 2; // number of data 
+			var flag = false;
+			var table = '';
+			var table_2 = '';
+			// var time = 0;
+			var PassengerId = null;
+			var Cost= 0 ;
+			var SeatAvailable= 0;
+			var Destination = 0 ;
+			var Departure= 0;
+			var RequestId= 0;
+			var Dep_data= 0;
+			for(var r = 0; r <= rows; r++){
+				// document.getElemmentById("table" + r).style.display = "block";
+				table += '<tr >';
+				
+				if(flag == false){
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Order Number' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Date' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Driver_email' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Cost' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'SeatAvailable' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+						table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td></tr>'
+
+						flag = true;
+					    continue
+					}	 
+					time = info[r-1].Time;
+					PassengerId = info[r-1].Driver_email
+					Cost= info[r-1].Cost ;
+					SeatAvailable= info[r-1].SeatAvailable;
+					Destination = info[r-1].Destination ;
+				    Departure= info[r-1].Departure;
+				    RequestId= info[r-1].RequestId;
+					Dep_data= info[r-1].Dep_date;
+					console.log(time,Cost,Dep_data)
+					// for(var c = 1; c <= columns; c++){
+					var n = r.toString();
+					// console.log(n)
+					table += '<tr><td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + n + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + time + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_data + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + PassengerId + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+					table += '<td style = "	padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+					table += '</tr>';
+					
+					}
+					document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;	text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+		}
+
+		function getOrderNumber() {
+    		var x = document.getElementById("mySelect").selectedIndex - 1;
+    		var PassengerId = info[x].Driver_email;
+
+    		var key = info[x].RequestId;
+    		var time = info[x].Time;
+    			alert("You are confirmed with PassengerID: " + PassengerId + " at " + time);
+	    			var param = {
+	    			"DriverID": query.username,
+	    			"Message" : "",
+	    			"PassengerID" : PassengerId,
+	    			"RequestId" : key
+		    	}
+		    	socket.emit('confirmDriver', param);
+		    	console.log(param);	
+		    	console.log(PassengerId);
+
+   }
+	</script>
+</div>
+	<div id = 'demo'></div>
+	<div id = 'demo1'></div>
+</body>
+</html>

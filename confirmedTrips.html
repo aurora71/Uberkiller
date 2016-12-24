@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<script src="/socket.io/socket.io.js"></script>
+  <title>Confirmed trips</title>
+<head>
+  <meta charset="utf-8">
+</head>
+<style type="text/css">
+   h2 {
+        position: relative;
+        left: 35%;
+        font-family: verdana;
+        font-size: 200%
+       } 
+      p{
+        position: relative;       
+        font-size: 130%;
+        font-family: normal;
+      } 
+
+</style>
+<body onload="Initialize()">
+<div>
+    <button onclick="goback()">Home</button>
+</div>
+  <!-- <div id = "myDiv"  onchange="getOrderNumber()">Select Order to Confirm </div> -->
+  <script type="text/javascript">
+
+    var socket = io();
+    var userName = '';
+    var DriverPostList = [];
+    var PassPostList = [];
+    var myPost = [];
+    var myPending = [];
+    var nums = 0;
+    
+    var requestDic = [];
+    var pendingDic = [];
+
+    function Initialize() {
+      var url = window.location.href;
+      var index = url.lastIndexOf('/');
+      userName = url.substring(index + 1);
+      console.log(userName);
+      GetDriverPostList();
+      
+    };
+    function goBack() {
+      window.location = '/' + userName;
+    }
+    function getTime(item) {
+      if (!item.hasOwnProperty("Time")) {
+        return "N/A";
+      } else {
+        return item.Time;
+      }
+    }
+    function GetDriverPostList() {
+       document.write('<div onclick="goBack()" style="font-family:verdana; font-size: 200%; color:FF5733;"><img src="https://mapdataservices.files.wordpress.com/2014/07/mdsmarker_sml.jpg?w=150" style="width:30px;height:30px;">UberKiller</div><hr width="100%">');
+       // document.write('<div>Confirmed Trips</div>')
+       document.write('<center><bold><h2>Confirmed Trips</div></bold></center></h2>');
+       document.write('<h4><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/509406-200.png" style="width:30px;height:30px;">As a Driver: </h4>');
+        socket.emit('ConfirmedTrip', userName);
+        socket.on('responseConfirm', function(result) {
+          console.log(result);
+          DriverPostList = result;
+          console.log(DriverPostList);
+          BuildDriver();
+      });
+    }
+
+    function BuildDriver() {
+        var result = DriverPostList[0];
+        var flag = false;
+        var Time = '';
+        var Cost = 0;
+        var SeatAvailable = 0;
+        var Driver_email = '';
+        var Departure = 0;
+        var Destination = 0;
+        var RequestId = 0;
+        var rows = result.Count;
+        var table = '';
+        var length = result.Items.length;
+        var count = 0;
+        var r = 0;
+        bd();
+        function bd(){
+          r++;
+          if (flag == false){
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Date' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Your Passenger' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Cost' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'SeatAvailable' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td></tr>'
+            flag = true;
+            if (rows == 0) {
+              getDriverPost(table);
+            } else {
+              bd();
+            }
+          } else {
+          console.log(r);
+          Time = getTime(result.Items[r - 2]);
+          Cost = result.Items[r-2].Cost;
+          SeatAvailable = result.Items[r-2].SeatAvailable;
+          Departure = result.Items[r-2].Departure;
+          Destination = result.Items[r-2].Destination;
+          Dep_date = result.Items[r-2].Dep_date;
+          RequestId = result.Items[r-2].RequestId;
+          socket.emit('getPassengerList', RequestId, function(err, data){
+              console.log(RequestId);
+              var passenger = '';
+              console.log(data);
+              if (data.Count != 0) {
+                data.Items.forEach(function(thisItem){
+                  passenger += thisItem.PassengerID;
+                  passenger += ' And  ';
+                });
+                var index = passenger.lastIndexOf('And');
+                passenger = passenger.substring(0, index);    
+                table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + passenger + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+                table += '</tr>';
+              }
+              if (r - 1 == rows) {
+                  getDriverPost(table);
+                } else {
+                  bd();
+                }
+          });    
+        }
+      }
+    }
+
+function getDriverPost(table){
+    var count = 0;
+    socket.emit('getDriverPost', userName, function(err, data){
+        var len = data.Items.length;
+        var r = 0;
+        gd();
+        function gd() {
+          if (len == 0) {
+            GetPassengerpost(table);
+            return;
+          } 
+          var item = data.Items[r];
+          var RequestId = item.RequestId;
+          socket.emit('queryByID', RequestId, function(err, data){
+           table += '<tr >';
+           if (data.hasOwnProperty('Item')) {
+               var item = data.Item;
+               var Time = getTime(data.Item);
+               var Cost = item.Cost;
+               var SeatAvailable = item.SeatAvailable;
+               var Departure = item.Departure;
+               var Destination = item.Destination;
+               var Dep_date = item.Dep_date;
+               var passenger = item.Driver_email;         
+              table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + passenger + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+              table += '</tr>';
+           }
+
+          r++;
+          if (r == len) {
+            GetPassengerpost(table);
+            
+          } else {
+            gd();
+          }   
+        });
+     }
+   });
+
+}
+
+function GetPassengerpost(table) {
+  document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+    document.write('<h4><img src="https://cdn4.iconfinder.com/data/icons/dot/256/taxi_passanger.png" style="width:30px;height:30px;">As a Passenger: </h4>');
+    socket.emit('searchPass', userName, function(err, data) {
+        PassPostList = data;
+        console.log(data);
+        BuildPassenger();
+  });
+}
+
+function BuildPassenger() {
+          var result = PassPostList.Items;
+          //console.log(result.length)
+          console.log(result)
+          var table = '';
+          var len = result.length;
+          console.log(len);
+          var flag = false;
+          var r = 0;
+          bp();
+          function bp(){
+          r++;
+          if (flag == false){
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Date' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;paddins-left:20px;">' + 'Time' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Your Driver' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Cost' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'SeatAvailable' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td></tr>'
+            flag = true;
+            if (len == 0) {
+              getPassengerPost(table);
+            } else {
+              bp();
+            }
+          } else {
+              console.log(result[r-2]);
+              var Time = getTime(result[r-2]);
+              var Cost = result[r-2].Cost;
+              var SeatAvailable = result[r-2].SeatAvailable;
+              var Departure = result[r-2].Departure;
+              var Destination = result[r-2].Destination;
+              var Dep_date = result[r-2].Dep_date;
+              var RequestId = result[r-2].RequestId;
+              socket.emit('getDriverList', RequestId, function(err, data){
+              console.log(data);
+              if (data.Items.length > 0) {
+                  var driver = data.Items[0].DriverID;   
+                  //table = '<tr >';
+                  table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + driver + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+                  table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+                  table += '</tr>';
+              }
+              if (r - 1 >= len) {
+                  getPassengerPost(table);
+               } else {
+                  console.log(r);
+                  bp();
+              }     
+
+            });
+        }
+      }
+         
+  }
+  
+  
+
+function getPassengerPost(table) {
+      var count = 0;
+    socket.emit('getPassengerPost', userName, function(err, data){
+        var len = data.Items.length;
+        var r = 0;
+        gp();
+        function gp() {
+          console.log(data);
+          console.log(r);
+          if (len == 0) {
+            final(table);
+            return;
+          } 
+          var item = data.Items[r];
+          console.log(item)
+          var RequestId = item.RequestId;
+          socket.emit('queryByID1', RequestId, function(err, data){
+           table += '<tr >';
+           if (data.hasOwnProperty('Item')) {
+               var item = data.Item;
+               var Time = getTime(data.Item);
+               var Cost = item.Cost;
+               var SeatAvailable = item.SeatAvailable;
+               var Departure = item.Departure;
+               var Destination = item.Destination;
+               var Dep_date = item.Dep_date;
+               var passenger = item.Driver_email;         
+              table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + passenger + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+              table += '</tr>';
+           }
+          r++;
+          if (r == len) {
+            final(table);
+            
+          } else {
+            gp();
+          }   
+        });
+     }
+    });
+}
+function final(table) {
+  document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+
+}
+
+</script>
+
+</body>
+</html>

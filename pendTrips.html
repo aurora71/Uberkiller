@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<script src="/socket.io/socket.io.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>table</title>
+</head>
+<style type="text/css">
+   h2 {
+        position: relative;
+        left: 35%;
+        font-family: verdana;
+        font-size: 200%
+       } 
+      p{
+        position: relative;       
+        font-size: 130%;
+        font-family: normal;
+      } 
+</style>
+<body background="http://www.likehdwallpaper.com/wp-content/uploads/Logo/FTP2/1280x800/Jordan%20NBA%20logo%20wallpapers%201280x800.jpg" onload="Initialize()">
+  <!-- <div id = "myDiv"  onchange="getOrderNumber()">Select Order to Confirm </div> -->
+  <script type="text/javascript">
+    var socket = io();
+    var userName = '';
+    var DriverPostList = [];
+    var PassPostList = [];
+    var myPost = [];
+    var myPending = [];
+    var nums = 0;
+    
+    var requestDic = [];
+    var pendingDic = [];
+
+    function Initialize() {
+      var url = window.location.href;
+      var index = url.lastIndexOf('/');
+      userName = url.substring(index + 1);
+      console.log(userName);
+      GetDriverPostList();
+      
+    };
+    function getTime(item) {
+      if (!item.hasOwnProperty("Time")) {
+        return "N/A";
+      } else {
+        return item.Time;
+      }
+    }
+    function GetDriverPostList() {
+        document.write('<h1>Waiting list</h1>');
+        document.write('<h2>Customers waiting for your confirmation: </h2>');
+        socket.emit('pendTrips', userName);
+        socket.on('responsePend', function(result) {
+          DriverPostList = result;
+          BuildDriver();
+      });
+    }
+    function BuildDriver() {
+        var result = DriverPostList[0];    
+        var table = '';
+        var Time = '';
+        var rows = result.Count;
+        var flag = false;
+        var Cost = 0;
+        var SeatAvailable = 0;
+        var Driver_email = '';
+        var Departure = 0;
+        var Destination = 0;
+        var RequestId = 0;
+        var length = result.Items.length;
+        var count = 0;
+        for(var r = 0; r <= rows; r++){
+          table += '<tr >';
+          if(flag == false){
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Date' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Cost' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Seat Available' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td></tr>'
+            flag = true;
+            continue;
+          }
+          //console.log(item);
+          Time = getTime(result.Items[r-1]);
+          Cost = result.Items[r-1].Cost;
+          SeatAvailable = result.Items[r-1].SeatAvailable;
+          Departure = result.Items[r-1].Departure;
+          Destination = result.Items[r-1].Destination;
+          Dep_date = result.Items[r-1].Dep_date;
+          RequestId = result.Items[r-1].RequestId;
+
+          table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+          table += '</tr>';
+      }
+                  
+      getDriverPost(table); 
+    
+}
+function getDriverPost(table){
+    var count = 0;
+    socket.emit('pendDriverPost', userName, function(err, data){
+        var len = data.Items.length;
+        var r = 0;
+        gd();
+        function gd() {
+          if (len == 0) {
+            BuildPassenger(table);
+            return;
+          } 
+          var item = data.Items[r];
+          var RequestId = item.RequestId;
+          socket.emit('queryByID', RequestId, function(err, data){
+           table += '<tr >';
+           if (data.hasOwnProperty('Item')) {
+               var item = data.Item;
+               var Time = getTime(item);
+               var Cost = item.Cost;
+               var SeatAvailable = item.SeatAvailable;
+               var Departure = item.Departure;
+               var Destination = item.Destination;
+               var Dep_date = item.Dep_date;
+               var passenger = item.Driver_email;   
+              table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+              table += '</tr>';
+           }
+          r++;
+          if (r == len) {
+            BuildPassenger(table);
+            
+          } else {
+            gd();
+          }   
+        });
+     }   
+  });
+}
+function BuildPassenger(table) {
+  document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>"); 
+  document.write('<h2>You are requesting these trips: </h2>');
+  var table = '';
+  var flag = false;
+  var rows = 0;
+ 
+  socket.emit('searchPass', userName, function(err, data) {
+    //console.log(data.Items[0].Time)
+    rows = data.Count;
+    console.log(data)
+    for(var r = 0; r <= rows; r++){
+          table += "<tr>";
+
+          if(flag == false){
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Date' + '</td>';
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>';
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Cost' + '</td>';
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'SeatAvailable' + '</td>';
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>';
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td></tr>';
+            flag = true;
+            continue;
+          }
+          //console.log(data.Items[r-1])
+          var Time = getTime(data.Items[r-1]);
+          
+          var Cost = data.Items[r-1].Cost;
+          var SeatAvailable = data.Items[r-1].SeatAvailable;
+          var Departure = data.Items[r-1].Departure;
+          var Destination = data.Items[r-1].Destination;
+          var Dep_date = data.Items[r-1].Dep_date;
+          var RequestId = data.Items[r-1].RequestId;
+          
+          //console.log(RequestId);
+          
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+          table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+          table += '</tr>';
+          //document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+      //});
+    }
+      getPassengerPost(table);
+  });
+}
+function getPassengerPost(table) {
+    socket.emit('pendPassengerPost', userName, function(err, data){
+        var len = data.Items.length;
+        var r = 0;
+        gp();
+        function gp() {
+          console.log(data);
+          console.log(r);
+          if (len == 0) {
+            final(table);
+            return;
+          } 
+          var item = data.Items[r];
+          console.log(item)
+          var RequestId = item.RequestId;
+          socket.emit('queryByID1', RequestId, function(err, data){
+           table += '<tr >';
+           if (data.hasOwnProperty('Item')) {
+               var item = data.Item;
+               var Time = getTime(data.Item);
+               var Cost = item.Cost;
+               var SeatAvailable = item.SeatAvailable;
+               var Departure = item.Departure;
+               var Destination = item.Destination;
+               var Dep_date = item.Dep_date;
+               var passenger = item.Driver_email;         
+              table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Cost + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+              table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+              table += '</tr>';
+           }
+          r++;
+          if (r == len) {
+            final(table);
+          } else {
+            gp();
+          }   
+        });
+     }
+    });
+}
+function final(table) {
+  document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<script src="/socket.io/socket.io.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>table</title>
+</head>
+<style type="text/css">
+   h2 {
+        position: relative;
+        left: 35%;
+        font-family: verdana;
+        font-size: 200%
+       } 
+      p{
+        position: relative;       
+        font-size: 130%;
+        font-family: normal;
+      } 
+</style>
+<body onload="Initialize()">
+  <!-- <div id = "myDiv"  onchange="getOrderNumber()">Select Order to Confirm </div> -->
+  <script type="text/javascript">
+      var socket = io();
+      var userName = '';
+      var DriverPostList = [];
+      var PassPostList = [];
+      var myPost = [];
+      var myPending = [];
+      var nums = 0;
+      
+      var requestDic = [];
+      var pendingDic = [];
+      function Initialize() {
+        var url = window.location.href;
+        var index = url.lastIndexOf('/');
+        userName = url.substring(index + 1);
+        console.log(userName);
+        GetDriverPostList();
+      
+      };
+      function GetDriverPostList() {
+        socket.emit('ConfirmedTrip', userName);
+        socket.on('responseConfirm', function(result) {
+          console.log(result);
+          DriverPostList = result;
+          waitingRequest();
+      });
+     }
+      function getTime(item) {
+        if (!item.hasOwnProperty("Time")) {
+          return "N/A";
+        } else {
+          return item.Time;
+        }
+     }
+      function Select2(length){
+      //console.log("select2");
+      //console.log(length)
+      //var Dic = pendingDic;
+      var myDiv = document.getElementById("myDiv2");
+      //console.log(pendingDic);
+      //console.log(pendingDic[1])
+
+      var selectList = document.createElement("select");
+      selectList.setAttribute("id","mySelect2");
+      myDiv.appendChild(selectList);
+      var temp = document.createElement("option");
+
+      temp.text = " ";
+      selectList.appendChild(temp)
+
+       for(var i = 0; i < pendingDic.length; i++){
+        var option = document.createElement("option");
+        option.setAttribute("value",pendingDic[i]);
+        //console.log(pendingDic[i])
+        option.text = pendingDic[i];
+        selectList.appendChild(option)
+      }
+    }
+    function Select(nums){
+    var myDiv = document.getElementById("myDiv");
+    var selectList = document.createElement("select");
+    selectList.setAttribute("id","mySelect");
+    myDiv.appendChild(selectList);
+    var temp = document.createElement("option");
+
+    temp.text = " ";
+    selectList.appendChild(temp)
+
+     for(var i = 0; i < requestDic.length; i++){
+      var option = document.createElement("option");
+      option.setAttribute("value",requestDic[i]);
+      //console.log(requestDic[i])
+      option.text = requestDic[i];
+      selectList.appendChild(option)
+    }
+  }
+    function goBack() {
+      window.location = '/' + userName;
+    }
+
+  function waitingRequest(){
+       document.write('<div onclick="goBack()" style="font-family:verdana; font-size: 200%; color:FF5733;"><img src="https://mapdataservices.files.wordpress.com/2014/07/mdsmarker_sml.jpg?w=150" style="width:30px;height:30px;">UberKiller</div><hr width="100%">');
+       // document.write('<div>Confirmed Trips</div>')
+       document.write('<center><h1>Pending Offer</div></center></h1>');
+       document.write('<h3><img src="https://cdn4.iconfinder.com/data/icons/dot/256/taxi_passanger.png" style="width:30px;height:30px;">Passenger Order Confirmation: </h3>');
+
+      // document.write('<h1 text-align: middle> Pending Offer </h1>');
+      document.write('<div id = "myDiv2"  onchange="getOrderNumber2()">Select Pending ID to Confirm </div>');
+      var result = DriverPostList[0];
+      var flag = false;
+      var Time = '';
+      var Cost = 0;
+      var SeatAvailable = 0;
+      var Driver_email = '';
+      var Departure = 0;
+      var Destination = 0;
+      var RequestId = 0;
+      var rows = result.Count;
+      var table = '';
+      var length = result.Items.length;
+      var count = 0;
+      var r = 0;
+      bd();
+      function bd(){
+          r++;
+          if (flag == false){
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Pending ID' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure Date' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Seats' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Passenger ID' + '</td>'
+            flag = true;
+            if (rows == 0) {
+                Select2(rows);
+                GetPassengerPostList(table);
+            } else {
+              bd();
+            }
+        } else {
+          Time = getTime(result.Items[r - 2]);
+          Cost = result.Items[r-2].Cost;
+          SeatAvailable = result.Items[r-2].SeatAvailable;
+          Departure = result.Items[r-2].Departure;
+          Destination = result.Items[r-2].Destination;
+          Dep_date = result.Items[r-2].Dep_date;
+          RequestId = result.Items[r-2].RequestId;
+          socket.emit('getPendingInfo',RequestId,function(err,data){
+              var passenger = '';
+              console.log(data);
+              var pendID = '';
+              if (data.Count != 0) {
+                data.Items.forEach(function(thisItem){
+                  passenger += thisItem.PassengerID;
+                  passenger += ' And  ';
+                  pendID = thisItem.PendingId;
+                });
+                var index = passenger.lastIndexOf('And');
+                passenger = passenger.substring(0, index);   
+                table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + pendID + '</td>' 
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + passenger + '</td>'
+                table += '</tr>';
+              }
+              if (r - 1 == rows) {
+                  Select2(rows);
+                  GetPassengerPostList(table);
+                } else {
+                  bd();
+                }
+          });
+        }
+      }
+  }
+
+  function GetPassengerPostList(table){
+    document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:16px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+
+    document.write('<h3><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/509406-200.png" style="width:30px;height:30px;">Driver Order Confirmation: </h3>');
+    document.write('<div id = "myDiv"  onchange="getOrderNumber()">Select Pending ID to Confirm </div>');
+    socket.emit('getList', userName, function (err, data){
+        
+        var len = data.Items.length;
+        console.log(len);
+        var r = 0;
+        var table = '';
+        gp();
+        function gp() {
+          console.log(r);
+          if (r == 0) {
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Pending ID' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure Date' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Time' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Departure' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Destination' + '</td>'
+            table += '<td style= "padding:18px;border-top: 1px solid #ffffff;border-bottom:1px ; text-align: left;padding-left:20px;">' + 'Passenger ID' + '</td>'
+          }
+          if (len == 0) {
+            Select(len);
+            final(table);
+            return;
+          }
+          var item = data.Items[r];
+          var pendID = item.PendingId;
+          console.log(item)
+          var RequestId = item.RequestId;
+          socket.emit('queryByID', RequestId, function(err, data){
+           table += '<tr >';
+           if (data.hasOwnProperty('Item')) {
+               var item = data.Item;
+               var Time = getTime(data.Item);
+               var Cost = item.Cost;
+               var SeatAvailable = item.SeatAvailable;
+               var Departure = item.Departure;
+               var Destination = item.Destination;
+               var Dep_date = item.Dep_date;
+               var passenger = item.Driver_email;         
+                table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + pendID + '</td>' 
+                table += '<tr><td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Dep_date + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Time + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Departure + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + Destination + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + SeatAvailable + '</td>'
+                table += '<td style = " padding:18px;border-top: 1px solid #ffffff;border-bottom:1px solid #e0e0e0;border-left: 1px solid #e0e0e0;background: #fafafa;background: -webkit-gradient(linear, left top, left bottom, from(#fbfbfb), to(#fafafa));background: -moz-linear-gradient(top,  #fbfbfb,  #fafafa);">' + passenger + '</td>'
+                table += '</tr>';
+           }
+          r++;
+          if (r == len) {
+            Select(len);
+            final(len);  
+          } else {
+            gp();
+          }   
+        });
+     }
+    });
+ }
+
+
+  function final(table) {
+  document.write("<table cellspacing='0' style = 'border-spacing: 0; font-family:Arial, Helvetica, sans-serif;color:#666;font-size:18px;  text-shadow: 1px 1px 0px #fff;background:#eaebec; margin:20px;border:#ccc 1px solid;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;-moz-box-shadow: 0 1px 2px #d1d1d1;-webkit-box-shadow: 0 1px 2px #d1d1d1;box-shadow: 0 1px 2px #d1d1d1;'>" + table + "</table>");
+
+}
+  function getOrderNumber() {
+      var x = document.getElementById("mySelect").selectedIndex - 1;
+      //console.log(x)
+      //console.log(requestDic)
+      var PendingId = requestDic[x];
+      alert("You are confirmed with order : " + PendingId);
+     
+      socket.emit('UpdateStatus', PendingId);
+    }
+
+  function getOrderNumber2() {
+      console.log("get order")
+      var x = document.getElementById("mySelect2").selectedIndex - 1;
+      console.log(x)
+      console.log(pendingDic)
+      var PendingId = pendingDic[x];
+      console.log(PendingId)
+      alert("You have booked car, id = " + iden + ' destination = ' + des);
+      var reservedItem = data[iden]; 
+     
+      socket.emit('UpdateStatus', PendingId);
+    }
+  </script>
+  
+</body>
+
+<body>
+  <div id = 'demo'></div>
+  <div id = 'demo1'></div>
+</body>
+
+
+</html>

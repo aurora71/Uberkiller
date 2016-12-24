@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<title>UberKiller</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/socket.io/socket.io.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDj2y2xpGLOGFigmxYkXGkgL9BaNJz3sTw&signed_in=true"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Raleway", Helvetica, sans-serif}
+fieldset { 
+    display: block;
+    margin-left: 430px;
+    margin-right: 430px;
+    margin-top: 50px;
+    margin-bottom: 10px;
+    padding-top: 0.625em;
+    padding-bottom: 0.625em;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+    background: #fff;
+}
+.myLink {display: none}
+.cancelbtn {
+    width: auto;
+    padding: 10px 10px;
+    background-color: #f44336;
+}
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 5px 5px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background: #F0E0DB;
+}
+
+</style>
+
+<!-- <body background = "w3-image" src="http://s3.amazonaws.com/digitaltrends-uploads-prod/2015/12/man-driving-in-car-in-the-city-ride-share-uber-lyft-getaround-zipcar.jpg"> -->
+<!-- <header class="w3-display-container w3-content w3-hide-small" style="max-width:1500px"> -->
+<!-- <img class="w3-image" src="http://s3.amazonaws.com/digitaltrends-uploads-prod/2015/12/man-driving-in-car-in-the-city-ride-share-uber-lyft-getaround-zipcar.jpg" alt="Driver" width="1500" height="700">
+ -->
+<!-- Navigation Bar -->
+<header class="w3-navbar w3-white w3-border-bottom w3-xlarge">
+  
+  <li><a href="#" class="w3-text-red w3-hover-red"><b><i class="fa fa-map-marker w3-margin-right"></i>UberKiller</b></a></li>
+  <li class="w3-right"><a href="#" class="w3-hover-red w3-text-grey"><i class="fa fa-search"></i></a></li>
+</header>
+<body background="http://s3.amazonaws.com/digitaltrends-uploads-prod/2015/12/man-driving-in-car-in-the-city-ride-share-uber-lyft-getaround-zipcar.jpg">
+
+
+<fieldset >
+<h3>Input your personal Information</h3>
+<h4 id="error" style="display: none">Please Make sure your input is Valid</h4>
+<form class="w3-large">
+First name:<br> <input type="text" id="firstName" name="FirstName" placeholder="First name"><br>
+Last name:<br> <input type="text" id="lastName" name="LastName" placeholder="Last name"><br>
+Email:<br> <input type="text" id="email" name="email" placeholder="Email address"><br>
+Password:<br> <input type="text" id="pw" name="pw" placeholder="Enter your PassWord"><br>
+Confirm Password:<br> <input type="text" id="cpw" name="cpw" placeholder="Enter confirm PassWord"><br>
+
+Driver Liscense:<br> <input type="text" id="Liscense" name="Liscense" placeholder="If you have one"><br>
+</form>
+<h3>If you have a car, Please enter your car infomation</h3>
+
+<select name="carlist" id = "carMake">
+  <option value="">Select Car Make</option>
+  <option value="Toyota">Toyota</option>
+  <option value="Honda">Honda</option>
+  <option value="Ford">Ford</option>
+  <option value="Audi">Audi</option>
+</select>
+
+<select name="model" id = "carModel" >
+  <option value="">Select Car Model</option>
+  <option value="Accord">Accord</option>
+  <option value="Camery">Camery</option>
+  <option value="A4">A4</option>
+</select>
+
+<select name="year" id = "carYear">
+  <option value="">Select year</option>
+  <option value="2008">2008</option>
+  <option value="2009">2009</option>
+  <option value="2010">2010</option>
+  <option value="2011">2011</option>
+  <option value="2012">2012</option>
+  <option value="2013">2013</option>
+  <option value="2014">2014</option>
+  <option value="2015">2015</option>
+  <option value="2016">2016</option>
+</select>
+<form action="vehicle information" class="w3-large">
+Licsence Plate: <input type="text" id="licsencePlate" name="FirstName" ><br>
+</form>
+
+
+<button onclick="getInput()" class="w3-red"> Submit </button>
+<!-- <p>Click the "Submit" button to create a account</p> -->
+</fieldset>
+</div>
+<p id="demo"></p>
+<p id="demo1"></p>
+<script>
+var socket = io(); 
+ socket.on('First message', function(data){
+    console.log(data.message);
+}); 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+function getInput() {
+
+	var firstName = document.getElementById("firstName").value;
+	var lastName = document.getElementById("lastName").value;
+	var email = document.getElementById("email").value;
+	var Password = document.getElementById("pw").value;
+	var cpassword = document.getElementById("cpw").value
+	var Liscense = document.getElementById("Liscense").value;
+
+	var carMake = document.getElementById("carMake").value;
+	var model = document.getElementById("carModel").value;
+	var year = document.getElementById("carYear").value;
+	var licsencePlate = document.getElementById("licsencePlate").value;
+
+	if(firstName && lastName && email && Password && cpassword){
+		if(isNumeric(firstName)){
+			return document.getElementById("demo1").innerHTML = "first name is an invalid string" ;
+		}
+		if(isNumeric(lastName)){
+			return document.getElementById("demo1").innerHTML = "last name is an invalid string" ;
+		}
+		if(!email.includes('@') || !email.includes('.')){
+			return document.getElementById("demo1").innerHTML = "email address is invalid" ;
+		} 
+		if (Password != cpassword) {
+			return document.getElementById("demo1").innerHTML = "Password Not Same" ;
+		}
+		// if(licsencePlate.length != 7){
+		// 	return document.getElementById("demo1").innerHTML = "licsence Plate is invalid" ;
+		// }
+		var input = {"Personal" : {
+			"firstName" : firstName,
+			"lastName" : lastName,
+			"email" : email,
+			"password" : Password,
+			"Liscense" : Liscense
+		},
+		"CarInfo" : {
+			"Make" : carMake,
+			"model" : model,
+			"year" : year,
+			"licsencePlate" : licsencePlate
+		}
+
+		};
+		socket.emit('Register User', input);
+		socket.on('response', function(resp) {
+			if (resp) {
+				window.location = '/';
+			} else {
+				document.getElementById('error').style.display='inline';
+			}
+
+		});
+
+		
+	}else{
+		var notice  = "Plase Enter All personal information"
+		document.getElementById("demo").innerHTML = notice;
+	}
+  
+
+}
+</script>
+</body>
+</html>
